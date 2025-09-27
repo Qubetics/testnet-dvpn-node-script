@@ -10,9 +10,9 @@ NODE_DIR="${HOME}/.qubetics-dvpnx"
 BINARY="${BINARY:-qubetics-dvpnx}"  # Default binary name; override by setting $BINARY
 API_PORT=18133
 PUBLIC_IP=$(curl -fsSL https://ifconfig.me)
-CHAIN_RPC="https://tendermint-testnet.qubetics.work"
+CHAIN_RPC="http://166.108.232.188:26657"
 CHAIN_ID="qubetics_9029-1"
-KEYRING_BACKEND="os"
+KEYRING_BACKEND="test"
 KEYRING_NAME="qubetics"
 WG_CONF="/etc/wireguard/wg0.conf"
 SYSTEMD_UNIT="/etc/systemd/system/dvpn-node.service"
@@ -202,6 +202,9 @@ echo "Binary moved to $INSTALL_PATH/${BINARY}"
     --node.interval-session-usage-sync-with-blockchain "${NODE_INTERVAL_SESSION_USAGE_SYNC_WITH_BLOCKCHAIN}" \
     --node.interval-session-validate "${NODE_INTERVAL_SESSION_VALIDATE}" \
     --node.interval-status-update "${NODE_INTERVAL_STATUS_UPDATE}" \
+    --tx.gas-prices  "0.1tics" \
+    --tx.gas-adjustment "1.6"
+
 
  
 
@@ -257,8 +260,8 @@ function cmd_start {
   
   # Format the URL properly for --node.remote-addrs
   NODE_REMOTE_URL="${CLEAN_IP}"
-  echo "Starting node with command:"
-  echo "${BINARY} start --home ${NODE_DIR} --keyring.backend ${KEYRING_BACKEND}"
+  # echo "Starting node with command:"
+  # echo "${BINARY} start --home ${NODE_DIR} --keyring.backend ${KEYRING_BACKEND}"
 
     # Ensure an up-to-date systemd unit and enable it
     write_systemd_unit

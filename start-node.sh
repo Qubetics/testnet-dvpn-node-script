@@ -191,7 +191,7 @@ echo "Binary moved to $INSTALL_PATH/${BINARY}"
     --node.moniker "${MONIKER}" \
     --node.api-port "${API_PORT}" \
     --node.remote-addrs "${PUBLIC_IP}" \
-    --node.gigabyte-prices "200;200;tics" \
+    --node.gigabyte-prices "20.0;20000000000000000000;tics" \
     --node.hourly-prices "1.0;1000000000000000000;tics" \
     --node.type "${NODE_TYPE}" \
     --rpc.addrs "${CHAIN_RPC}" \

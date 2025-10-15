@@ -9,7 +9,8 @@ set -Eeou pipefail
 NODE_DIR="${HOME}/.qubetics-dvpnx"
 BINARY="${BINARY:-qubetics-dvpnx}"  # Default binary name; override by setting $BINARY
 API_PORT=18133
-PUBLIC_IP=$(curl -fsSL https://ifconfig.me)
+# Try to fetch a public IP but don't let a failure abort the script early; we'll validate below
+PUBLIC_IP=$(curl -fsSL https://ifconfig.me || true)
 CHAIN_RPC="http://166.108.232.188:26657"
 CHAIN_ID="qubetics_9029-1"
 KEYRING_BACKEND="test"
@@ -28,6 +29,22 @@ err() { echo "[ERROR] $*" >&2; }
 require() { command -v "$1" >/dev/null 2>&1 || { err "Missing required command: $1"; exit 1; }; }
 # Attempt to detect a routable public IP quickly without failing the script
 detect_public_ip() { curl -fsSL --max-time 5 https://ifconfig.me || true; }
+
+# Validate the detected public IP is IPv4. If curl earlier failed, try the quick detect helper.
+# If an IPv6 address is detected, instruct the user to use IPv4 and exit since the node
+# setup requires an IPv4 public address for remote-addrs and connectivity in this setup.
+if [[ -z "${PUBLIC_IP:-}" ]]; then
+  PUBLIC_IP="$(detect_public_ip)"
+fi
+
+# Normalize and check for ':' which indicates IPv6 (IPv4 won't contain ':')
+CLEAN_PUBLIC_IP=${PUBLIC_IP#http://}
+CLEAN_PUBLIC_IP=${CLEAN_PUBLIC_IP#https://}
+if [[ -n "${CLEAN_PUBLIC_IP}" && "${CLEAN_PUBLIC_IP}" == *:* ]]; then
+  echo "[ERROR] Detected public IP (${CLEAN_PUBLIC_IP}) appears to be IPv6."
+  echo "This script requires an IPv4 public IP. Please provide an IPv4 address or disable IPv6."
+  exit 1
+fi
 
 
 # Sync wireguard settings from wg0.conf into config.toml
